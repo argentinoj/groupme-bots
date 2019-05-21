@@ -4,9 +4,6 @@ John Argentino
 This script will parse groupme ids using linux commands
 """
 
-import os
-import json
-
 """
 result format:
 {"response":[<group0>, <group1>, ...]}
@@ -58,7 +55,15 @@ messages format:
 }
 """
 
-def get_users():
+import os
+import json
+
+"""
+	get_users
+	asks the user for their access token, then returns a list of 
+	all the groups associated with the user
+"""
+def get_groups():
 	token = input("access token:")
 
 	user_cmd = "curl https://api.groupme.com/v3/groups?token=" + token
@@ -67,11 +72,26 @@ def get_users():
 
 	result_dict = json.loads(result_str)
 
-	return result_dict
+	return result_dict['response']
+
+"""
+	find_group()
+	inputs:
+		groups: list of groups each in the dictionary format from the get_groups function
+		name: string that is the name of the group we want
+	output:
+		dictionary of the group if found, None if we did not find the group
+"""
+def find_group(groups, name):
+	try:
+		g = list(filter(lambda g: g["name"] == name, groups))
+		return g
+	except IndexError:
+		return None
 
 if __name__ == "__main__":
-	res = get_users()
-	groups = res["response"]
-	for g in groups:
-		print(json.dumps(res, indent=4))
-		break
+	groups_list = get_groups()
+	#print(groups_list)
+	group_name = input("search for a group by name:")
+	group = find_group(groups_list, group_name)
+	print(json.dumps(group, indent=4))
